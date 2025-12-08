@@ -9,7 +9,7 @@ const DeleteConfirmModal = ({ isOpen, onClose, onDelete, title, message }) => {
             <div className="bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative animate-in fade-in zoom-in duration-200">
                 <div className="flex items-center justify-between mb-4">
                     <h5 className="text-xl font-bold text-gray-900">{title || "Confirm Delete"}</h5>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer">
                         <LuX className="text-2xl" />
                     </button>
                 </div>
@@ -21,13 +21,13 @@ const DeleteConfirmModal = ({ isOpen, onClose, onDelete, title, message }) => {
                 <div className="flex justify-end gap-3">
                     <button
                         onClick={onClose}
-                        className="px-5 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium transition-colors"
+                        className="px-5 py-2.5 rounded-xl text-gray-600 hover:bg-gray-100 font-medium transition-colors cursor-pointer border border-gray-200 "
                     >
                         Cancel
                     </button>
                     <button
                         onClick={onDelete}
-                        className="px-5 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/20"
+                        className="px-5 py-2.5 rounded-xl bg-primary text-white font-medium hover:bg-purple-700 transition-colors shadow-lg shadow-purple-500/20 cursor-pointer"
                     >
                         Delete
                     </button>

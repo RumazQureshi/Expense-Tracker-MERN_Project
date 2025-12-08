@@ -1,6 +1,9 @@
+
+import { BASE_URL } from "./apiPaths";
+
 export const validateEmail = (email) => {
-    const regex = /^[^\s@]+@[^zs@]+\.[^\s@]+$/;
-    return regex.test(email);
+  const regex = /^[^\s@]+@[^zs@]+\.[^\s@]+$/;
+  return regex.test(email);
 };
 
 export const getInitials = (name) => {
@@ -26,4 +29,20 @@ export const addThousandsSeparator = (num) => {
   return fractionalPart
     ? `${formattedInteger}.${fractionalPart}`
     : formattedInteger;
+};
+
+export const getProfileImageUrl = (url) => {
+  if (!url) return null;
+
+  // If the image is stored in our /uploads/ directory, force it to use the current BASE_URL
+  // This handles cases where the port might have changed (e.g. stored as localhost:5000 but running on 8000)
+  if (url.includes("/uploads/")) {
+    const filename = url.split("/uploads/").pop();
+    return `${BASE_URL}/uploads/${filename}`;
+  }
+
+  if (url.startsWith("http") || url.startsWith("data:")) {
+    return url;
+  }
+  return `${BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 };

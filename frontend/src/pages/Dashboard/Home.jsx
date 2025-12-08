@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import { useUserAuth } from '../../hooks/useUserAuth';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,6 @@ import axiosInstance from '../../utils/axiosInstance';
 import StatsCard from '../../components/Cards/StatsCard';
 import TransactionCard from '../../components/Cards/TransactionCard';
 import OverviewChart from '../../components/Charts/OverviewChart';
-
 import { LuHandCoins, LuWalletMinimal, LuArrowRight } from "react-icons/lu";
 import { IoMdCard } from 'react-icons/io';
 import { addThousandsSeparator } from '../../utils/helper';

@@ -4,9 +4,11 @@ import { UserContext } from "../../context/UserContext";
 import { SIDE_MENU_DATA } from "../../utils/data";
 import CharAvatar from "../Cards/CharAvatar";
 import { LuX } from "react-icons/lu";
+import { getProfileImageUrl } from "../../utils/helper";
 
 const SideMenu = ({ activeMenu, onClose }) => {
   const { user, clearUser } = useContext(UserContext);
+  const [imgError, setImgError] = React.useState(false);
   const navigate = useNavigate();
 
   const handleClick = (route) => {
@@ -36,11 +38,12 @@ const SideMenu = ({ activeMenu, onClose }) => {
       </div>
 
       <div className="flex flex-col items-center justify-center gap-3 mb-10">
-        {user?.profileImageUrl ? (
+        {!imgError && user?.profileImageUrl ? (
           <img
-            src={user?.profileImageUrl || ""}
+            src={getProfileImageUrl(user?.profileImageUrl) || ""}
             alt="Profile Picture"
             className="w-20 h-20 rounded-full object-cover border-4 border-purple-50"
+            onError={() => setImgError(true)}
           />
         ) : (
           <CharAvatar

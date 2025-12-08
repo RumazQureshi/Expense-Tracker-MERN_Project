@@ -50,7 +50,7 @@ const AddTransactionModal = ({ isOpen, onClose, type, onAdd, initialData }) => {
                 <div className="flex items-center justify-between mb-6">
                     <h5 className="text-xl font-bold text-gray-900">{initialData ? 'Edit' : 'Add'} {type === 'income' ? 'Income' : 'Expense'}</h5>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
-                        <LuX className="text-2xl" />
+                        <LuX className="text-2xl cursor-pointer" />
                     </button>
                 </div>
 
@@ -60,7 +60,7 @@ const AddTransactionModal = ({ isOpen, onClose, type, onAdd, initialData }) => {
                     <div className="relative">
                         <button
                             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                            className="flex items-center gap-3 w-full p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left"
+                            className="flex items-center gap-3 w-full p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors text-left cursor-pointer"
                         >
                             <div className="w-10 h-10 flex items-center justify-center bg-orange-50 text-2xl rounded-full">
                                 {icon || <LuUpload className="text-primary text-lg" />}
@@ -113,13 +113,13 @@ const AddTransactionModal = ({ isOpen, onClose, type, onAdd, initialData }) => {
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="input-box"
+                            className="input-box cursor-pointer"
                         />
                     </div>
 
                     <button
                         onClick={handleSubmit}
-                        className="btn-primary mt-4"
+                        className="btn-primary mt-4 cursor-pointer"
                     >
                         {initialData ? 'Update' : 'Add'} {type === 'income' ? 'Income' : 'Expense'}
                     </button>

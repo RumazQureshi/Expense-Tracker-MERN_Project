@@ -66,12 +66,55 @@ exports.loginUser = async (req, res) => {
     // Check if user exists
     const user = await User.findOne({ email });
 
-    // Invalid email or password
-    if (!user || !(await user.comparePassword(password))) {
+    // User not found
+    if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Success response
+    // Check failed attempts
+    if (user.failedLoginAttempts >= 3) {
+      // Check if security question is set
+      if (user.securityQuestion && user.securityAnswer) {
+        return res.status(403).json({
+          message: "Account locked. Please answer your security question to reset password.",
+          errorType: "ACCOUNT_LOCKED",
+          securityQuestion: user.securityQuestion
+        });
+      } else {
+        // Fallback if no security question set - though requirement says "save it in db so that..." implying flow depends on it.
+        // Ideally user should set it up. If not, they might be stuck unless we allow generic reset or contact support.
+        // For now, let's keep the message generic or just return invalid credentials if we want to hide existence (but here user knows email is right).
+        // Let's assume we return locked message but with no question if they haven't set one?
+        // Or just allow retry if no sec question? "User entered wrong pass 3 times then there should be an option arrive"
+        // If no security question, maybe just block?
+        return res.status(403).json({ message: "Account locked. Please contact support.", errorType: "ACCOUNT_LOCKED_NO_QA" });
+      }
+    }
+
+    // Invalid password
+    if (!(await user.comparePassword(password))) {
+      user.failedLoginAttempts += 1;
+      await user.save();
+
+      const attemptsLeft = 4 - user.failedLoginAttempts;
+      if (attemptsLeft === 0) {
+        if (user.securityQuestion) {
+          return res.status(403).json({
+            message: "Account locked. Please answer your security question to reset password.",
+            errorType: "ACCOUNT_LOCKED",
+            securityQuestion: user.securityQuestion
+          });
+        }
+        return res.status(403).json({ message: "Account locked.", errorType: "ACCOUNT_LOCKED_NO_QA" });
+      }
+
+      return res.status(400).json({ message: `Invalid credentials. ${attemptsLeft} attempts remaining.` });
+    }
+
+    // Success response - Reset failed attempts
+    user.failedLoginAttempts = 0;
+    await user.save();
+
     res.status(200).json({
       id: user._id,
       user,
@@ -110,9 +153,9 @@ exports.updateUserInfo = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Delete old image if a new one is provided
-    if (profileImageUrl && user.profileImageUrl && profileImageUrl !== user.profileImageUrl) {
-      console.log(`[Profile Update] Changing image from ${user.profileImageUrl} to ${profileImageUrl}`);
+    // Delete old image if a new one is provided or if usage is explicitly removed
+    if ((profileImageUrl || profileImageUrl === "") && user.profileImageUrl && profileImageUrl !== user.profileImageUrl) {
+      console.log(`[Profile Update] Changing image from ${user.profileImageUrl} to ${profileImageUrl || "null"}`);
 
       const oldUrlParts = user.profileImageUrl.split('/uploads/');
       // Check if the old image was actually a local upload
@@ -137,13 +180,55 @@ exports.updateUserInfo = async (req, res) => {
     }
 
     if (fullName) user.fullName = fullName;
-    if (profileImageUrl) user.profileImageUrl = profileImageUrl;
+    if (profileImageUrl || profileImageUrl === "") user.profileImageUrl = profileImageUrl === "" ? null : profileImageUrl;
     if (currency) user.currency = currency;
+
+    // Update Security Question
+    const { securityQuestion, securityAnswer } = req.body;
+    if (securityQuestion) user.securityQuestion = securityQuestion;
+    if (securityAnswer) user.securityAnswer = securityAnswer; // Hashed by pre-save hook
 
     await user.save();
 
     res.status(200).json({ message: "Profile updated successfully", user });
   } catch (err) {
     res.status(500).json({ message: "Error updating profile", error: err.message });
+  }
+};
+
+// Reset Password with Security Question
+exports.resetPasswordWithSecurityQuestion = async (req, res) => {
+  const { email, securityAnswer, newPassword } = req.body;
+
+  if (!email || !securityAnswer || !newPassword) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ message: "Password must be at least 6 characters" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.securityAnswer) {
+      return res.status(400).json({ message: "Security question not set up for this account." });
+    }
+
+    const isMatch = await user.matchSecurityAnswer(securityAnswer);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect security answer" });
+    }
+
+    user.password = newPassword; // Will be hashed by pre-save
+    user.failedLoginAttempts = 0; // Unlock account
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successfully. You can now login." });
+  } catch (err) {
+    res.status(500).json({ message: "Error resetting password", error: err.message });
   }
 };

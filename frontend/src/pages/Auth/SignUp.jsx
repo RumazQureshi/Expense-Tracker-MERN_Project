@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useContext } from 'react'
 import AuthLayout from '../../components/layouts/AuthLayout'
 import Input from '../../components/Inputs/input';
 import { Link, useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import ProfilePhotoSelector from '../../components/Inputs/ProfilePhotoSelector';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
-import { useContext } from 'react';
+
 import uploadImage from '../../utils/uploadImage';
 
 const SignUp = () => {
@@ -21,7 +21,6 @@ const SignUp = () => {
   const { updateUser } = useContext(UserContext)
   const navigate = useNavigate();
 
-  // handle sign up form submit 
   const handleSignUp = async (e) => {
     e.preventDefault();
 
