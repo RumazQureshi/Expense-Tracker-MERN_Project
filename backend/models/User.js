@@ -12,6 +12,7 @@ const UserSchema = new mongoose.Schema(
     securityQuestion: { type: String },
     securityAnswer: { type: String }, // Hashed
     failedLoginAttempts: { type: Number, default: 0 },
+    completedTours: { type: [String], default: [] },
   },
   { timestamps: true }
 );

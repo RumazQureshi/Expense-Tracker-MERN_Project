@@ -24,7 +24,12 @@ const OverviewChart = ({ data, totalBalance }) => {
     const { user } = useUserAuth();
     const currencySymbol = user ? getCurrencySymbol(user.currency) : '$';
 
-    const isDataEmpty = data.every(item => item.value === 0);
+    const processedData = data.map(item => ({
+        ...item,
+        value: Math.max(0, item.value)
+    }));
+
+    const isDataEmpty = processedData.every(item => item.value === 0);
 
     if (isDataEmpty) {
         return (
@@ -39,7 +44,7 @@ const OverviewChart = ({ data, totalBalance }) => {
             <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                     <Pie
-                        data={data}
+                        data={processedData}
                         cx="50%"
                         cy="50%"
                         innerRadius={80}

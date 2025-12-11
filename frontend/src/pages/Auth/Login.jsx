@@ -83,7 +83,7 @@ const Login = () => {
     }
 
     try {
-      const response = await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD_SECURITY, {
+      await axiosInstance.post(API_PATHS.AUTH.RESET_PASSWORD_SECURITY, {
         email,
         securityAnswer,
         newPassword
@@ -113,13 +113,14 @@ const Login = () => {
 
 
         {!isLocked ? (
-          <form onSubmit={handleLogin}>
+          <form>
             <Input
               value={email}
               onChange={({ target }) => setEmail(target.value)}
               label="Email Address"
               type="email"
               placeholder="you@example.com"
+              autoComplete="username"
             />
 
             <Input
@@ -128,11 +129,12 @@ const Login = () => {
               label="Password"
               type="password"
               placeholder="Minimum 6 Characters"
+              autoComplete="current-password"
             />
 
             {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
 
-            <button type="submit" className='btn-primary cursor-pointer mt-5'>
+            <button type="button" onClick={handleLogin} className='btn-primary cursor-pointer mt-5'>
               LOGIN
             </button>
 

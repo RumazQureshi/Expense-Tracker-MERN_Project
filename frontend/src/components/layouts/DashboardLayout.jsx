@@ -1,45 +1,15 @@
-import React, { useContext, useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import React, { useContext, useState } from "react";
 import { UserContext } from "../../context/UserContext";
 import SideMenu from "./SideMenu";
 import ChatBot from "../ChatBot/ChatBot";
 import { LuMenu } from "react-icons/lu";
-import SecurityAlertModal from "../Modals/SecurityAlertModal";
+
+import TourGuide from "../TourGuide";
 
 const DashboardLayout = ({ children, activeMenu }) => {
   const { user, showChatBot } = useContext(UserContext);
   const [isOpen, setIsOpen] = useState(false);
-  const [showSecurityModal, setShowSecurityModal] = useState(false);
-  const location = useLocation(); // Get current location
 
-  useEffect(() => {
-    // Check if user is loaded and security question is missing
-    // AND we are NOT on the settings page
-    if (user && !user.securityQuestion && location.pathname !== '/settings') {
-      const hasSeenAlert = sessionStorage.getItem('securityAlertSeen');
-      if (!hasSeenAlert) {
-        const timer = setTimeout(() => {
-          setShowSecurityModal(true);
-        }, 5000); // 5 seconds delay
-        return () => clearTimeout(timer);
-      }
-    } else {
-      // If we go to settings page, maybe we should hide it strictly?
-      // Or if user fixes it, it disappears. 
-      // For now, just preventing opening it new on settings.
-      // If it was already open, should we close it? 
-      // User request says "should not show when the user is no settings page"
-      // Let's safe close it if we navigate to settings.
-      if (location.pathname === '/settings') {
-        setShowSecurityModal(false);
-      }
-    }
-  }, [user, location.pathname]); // Add location.pathname to deps
-
-  const handleCloseSecurityModal = () => {
-    setShowSecurityModal(false);
-    sessionStorage.setItem('securityAlertSeen', 'true');
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row ">
@@ -47,10 +17,14 @@ const DashboardLayout = ({ children, activeMenu }) => {
       <div className="md:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200 sticky top-0 z-40 shadow-md">
         <div className="flex items-center gap-4">
           <button
+            id="mobile-menu-btn"
             onClick={() => setIsOpen(!isOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600 relative"
           >
             <LuMenu className="text-2xl" />
+            {user && !user.securityQuestion && (
+              <span className="absolute top-2 right-2 w-2.5 h-2.5 bg-red-600 rounded-full border-2 border-white z-50"></span>
+            )}
           </button>
           <h2 className="text-lg font-bold text-gray-900">Expense Tracker</h2>
         </div>
@@ -86,7 +60,8 @@ const DashboardLayout = ({ children, activeMenu }) => {
       </div>
 
       {showChatBot && <ChatBot />}
-      {showSecurityModal && <SecurityAlertModal onClose={handleCloseSecurityModal} />}
+
+      <TourGuide />
     </div>
   );
 };

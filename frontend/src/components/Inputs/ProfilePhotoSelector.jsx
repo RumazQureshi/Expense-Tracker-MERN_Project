@@ -41,7 +41,7 @@ const ProfilePhotoSelector = ({image, setImage}) => {
 
             <button
                 type="button" 
-                className='w-8 h-8 flex items-center justify-center bg-primary text-white rounded-full absolute -bottom-1 -right-1'
+                className='w-8 h-8 flex items-center justify-center bg-primary text-white rounded-full absolute -bottom-1 -right-1 cursor-pointer'
                 onClick={onChooseFile}
             >
                 <LuUpload/>

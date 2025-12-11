@@ -2,31 +2,47 @@ import React from 'react';
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import Bubbles from "../Backgrounds/Bubbles";
 import CARD_2 from "../../assets/images/CARD_2.png";
-import { LuTrendingUpDown } from "react-icons/lu";
+import { LuTrendingUpDown, LuMail } from "react-icons/lu";
 
 const AuthLayout = ({ children }) => {
     return <div className="flex" >
-        <div className='w-screen h-screen md:w-[60vw] px-12 pt-8 pb-12'>
-            <h2 className='text-4xl font-bold text-black py-2'>Expense Tracker </h2>
-            <Typewriter
-                words={[
-                    "Track your income & expenses.",
-                    "Visualize your finances.",
-                    "Manage your budget.",
-                    "Analyze your spending habits.",
-                    "Control your savings.",
-                    "Set financial goals.",
-                    "Monitor daily spending."
-                ]}
-                loop={true}
-                cursor
-                cursorStyle='|'
-                typeSpeed={70}
-                deleteSpeed={50}
-                delaySpeed={1000}
-            />
-            {children}
+        <div className='w-screen h-screen md:w-[60vw] px-12 pt-8 pb-12 relative flex flex-col justify-between'>
+            <div>
+                <h2 className='text-4xl font-bold text-black py-2'>Expense Tracker </h2>
+                <Typewriter
+                    words={[
+                        "Track your income & expenses.",
+                        "Visualize your finances.",
+                        "Manage your budget.",
+                        "Analyze your spending habits.",
+                        "Control your savings.",
+                        "Set financial goals.",
+                        "Monitor daily spending."
+                    ]}
+                    loop={true}
+                    cursor
+                    cursorStyle='|'
+                    typeSpeed={70}
+                    deleteSpeed={50}
+                    delaySpeed={1000}
+                />
+            </div>
 
+            <div className="flex-1 flex flex-col justify-center">
+                {children}
+            </div>
+
+            <div className="mt-4">
+                <a
+                    href="mailto:info@rasinnovatech.com"
+                    className="inline-flex items-center gap-2 text-gray-600 hover:text-primary transition-colors text-sm font-medium cursor-pointer"
+                >
+                    <span className="p-2 bg-gray-100 rounded-full text-lg text-primary">
+                        <LuMail />
+                    </span>
+                    Contact Us
+                </a>
+            </div>
         </div>
         <div className='hidden md:block w-[40vw] h-screen bg-violet-50 bg-auth-bg-img bg-cover bg-no-repeat bg-center overflow-hidden p-8 px-8 relative'>
             <motion.div
@@ -80,7 +96,7 @@ const CountUpStats = ({ icon, label, value, color }) => {
     React.useEffect(() => {
         const controls = animate(count, value, { duration: 2 });
         return controls.stop;
-    }, [value]);
+    }, [value, count]);
 
     // Update text content directly for performance and to avoid re-renders
     React.useEffect(() => {

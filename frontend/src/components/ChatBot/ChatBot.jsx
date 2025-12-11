@@ -87,9 +87,9 @@ const ChatBot = () => {
                         </div>
                         <button
                             onClick={() => setIsOpen(false)}
-                            className="p-1 hover:bg-white/20 rounded-lg transition-colors"
+                            className="p-1 hover:bg-white/20 rounded-lg transition-colors cursor-pointer"
                         >
-                            <LuX className="text-xl" />
+                            <LuX className="text-xl cursor-pointer" />
                         </button>
                     </div>
 
@@ -130,7 +130,7 @@ const ChatBot = () => {
                             <button
                                 key={suggestion}
                                 onClick={() => handleSend(suggestion)}
-                                className="whitespace-nowrap px-3 py-1 bg-white border border-gray-200 rounded-full text-xs text-gray-600 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm"
+                                className="whitespace-nowrap px-3 py-1 bg-white border border-gray-200 rounded-full text-xs text-gray-600 hover:bg-primary hover:text-white hover:border-primary transition-all shadow-sm cursor-pointer"
                             >
                                 {suggestion}
                             </button>
@@ -153,7 +153,7 @@ const ChatBot = () => {
                                 disabled={loading || !input.trim()}
                                 className="p-2 bg-primary text-white rounded-xl hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
-                                <LuSend className="text-lg" />
+                                <LuSend className="text-lg cursor-pointer" />
                             </button>
                         </div>
                     </div>

@@ -2,6 +2,8 @@ const Income = require("../models/Income");
 const Expense = require("../models/Expense");
 const Chat = require("../models/Chat");
 
+const User = require("../models/User");
+
 exports.chatWithAI = async (req, res) => {
     try {
         const { message } = req.body;
@@ -11,8 +13,11 @@ exports.chatWithAI = async (req, res) => {
         await Chat.create({ userId, message, role: 'user' });
 
         // 2. Fetch Data for Context
+        const user = await User.findById(userId);
         const income = await Income.find({ userId });
         const expense = await Expense.find({ userId });
+
+        const currency = user ? user.currency : "USD";
 
         const totalIncome = income.reduce((acc, curr) => acc + curr.amount, 0);
         const totalExpense = expense.reduce((acc, curr) => acc + curr.amount, 0);
@@ -28,18 +33,18 @@ exports.chatWithAI = async (req, res) => {
         let reply = "";
 
         if (msg.includes("balance") || msg.includes("money") || msg.includes("left")) {
-            reply = `Your total current balance is ${totalBalance} ${"USD"}.`;
+            reply = `Your total current balance is ${totalBalance} ${currency}.`;
         } else if (msg.includes("income") || msg.includes("earned")) {
-            reply = `Your total recorded income is ${totalIncome} ${"USD"}.`;
+            reply = `Your total recorded income is ${totalIncome} ${currency}.`;
         } else if (msg.includes("expense") || msg.includes("spent") || msg.includes("spend")) {
-            reply = `You have spent a total of ${totalExpense} ${"USD"}.`;
+            reply = `You have spent a total of ${totalExpense} ${currency}.`;
         } else if (msg.includes("recent") || msg.includes("transaction") || msg.includes("last")) {
             if (recentTransactions.length === 0) {
                 reply = "You don't have any recent transactions.";
             } else {
                 reply = "Here are your last 5 transactions:\n";
                 recentTransactions.forEach(t => {
-                    reply += `- ${t.type.toUpperCase()}: ${t.amount} (${t.category || t.source || 'N/A'})\n`;
+                    reply += `- ${t.type.toUpperCase()}: ${t.amount} ${currency} (${t.category || t.source || 'N/A'})\n`;
                 });
             }
         } else if (msg.includes("hello") || msg.includes("hi") || msg.includes("hey")) {

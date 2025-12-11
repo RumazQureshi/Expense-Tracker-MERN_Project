@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
+
+
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import { UserContext } from '../../context/UserContext';
 
@@ -6,9 +8,16 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import toast from 'react-hot-toast';
 import CurrencySelector from '../../components/Inputs/CurrencySelector';
-import { LuUpload, LuTrash } from "react-icons/lu";
+import { LuUpload, LuTrash, LuChevronDown } from "react-icons/lu";
 import { getProfileImageUrl } from "../../utils/helper";
 import CharAvatar from '../../components/Cards/CharAvatar';
+
+const PREDEFINED_QUESTIONS = [
+    "What is your friend name?",
+    "What was the name of your first pet?",
+    "What is your favorite city?",
+    "Other"
+];
 
 const Settings = () => {
     const { user, updateUser, showChatBot, updateChatBotSettings } = useContext(UserContext);
@@ -25,12 +34,9 @@ const Settings = () => {
     const [isCustomQuestion, setIsCustomQuestion] = useState(false);
     const fileRef = React.useRef(null);
 
-    const PREDEFINED_QUESTIONS = [
-        "What is your friend name?",
-        "What was the name of your first pet?",
-        "What is your favorite city?",
-        "Other"
-    ];
+    const [selectedFile, setSelectedFile] = useState(null);
+
+
 
     useEffect(() => {
         if (user) {
@@ -72,37 +78,40 @@ const Settings = () => {
         }
     };
 
-    const handleImageUpload = async (e) => {
+    const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const uploadData = new FormData();
-        uploadData.append("image", file);
-
-        try {
-            const response = await axiosInstance.post(API_PATHS.IMAGE.UPLOAD_IMAGE, uploadData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-            if (response.data && response.data.imageUrl) {
-                setFormData((prev) => ({ ...prev, profileImageUrl: response.data.imageUrl }));
-                toast.success("Image uploaded successfully");
-            }
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            toast.error("Failed to upload image");
-        }
+        setSelectedFile(file);
+        setFormData((prev) => ({ ...prev, profileImageUrl: URL.createObjectURL(file) }));
     };
 
     const handleImageDelete = () => {
+        setSelectedFile(null);
         setFormData((prev) => ({ ...prev, profileImageUrl: "" }));
         setImgError(false);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const promise = axiosInstance.put(API_PATHS.AUTH.UPDATE_USER, formData);
+
+        const data = new FormData();
+        data.append("fullName", formData.fullName);
+        data.append("currency", formData.currency);
+        if (formData.securityQuestion) data.append("securityQuestion", formData.securityQuestion);
+        if (formData.securityAnswer) data.append("securityAnswer", formData.securityAnswer);
+
+        if (selectedFile) {
+            data.append("image", selectedFile);
+        } else {
+            data.append("profileImageUrl", formData.profileImageUrl);
+        }
+
+        const promise = axiosInstance.put(API_PATHS.AUTH.UPDATE_USER, data, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
 
         try {
             const response = await toast.promise(promise, {
@@ -112,6 +121,7 @@ const Settings = () => {
             });
             updateUser(response.data.user);
             updateChatBotSettings(isChatBotEnabled);
+            setSelectedFile(null);
         } catch (error) {
             console.error("Error updating profile:", error);
         }
@@ -124,9 +134,9 @@ const Settings = () => {
 
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <h5 className="text-lg font-semibold text-gray-900 mb-4">Profile Information</h5>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4" id="settings-form">
                         <div className="flex flex-col items-center justify-center mb-6">
-                            <div className="relative mb-3 group flex items-center justify-center">
+                            <div className="relative mb-3 group flex items-center justify-center" id="settings-profile-pic">
                                 <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-purple-50 relative flex items-center justify-center">
                                     {!imgError && formData.profileImageUrl ? (
                                         <img
@@ -183,41 +193,52 @@ const Settings = () => {
                             <p className="text-sm text-gray-500">Click to upload new picture</p>
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                            <input
-                                type="text"
-                                name="fullName"
-                                value={formData.fullName}
-                                onChange={handleChange}
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
-                                placeholder="Enter your full name"
-                            />
-                        </div>
+                        <div id="settings-personal-info">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                                <input
+                                    type="text"
+                                    name="fullName"
+                                    value={formData.fullName}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                                    placeholder="Enter your full name"
+                                />
+                            </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                disabled
-                                className="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
-                            />
-                        </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    disabled
+                                    className="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 cursor-not-allowed"
+                                />
+                            </div>
 
-                        <div>
+                            <div>
+                                <CurrencySelector
+                                    value={formData.currency}
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </div>
+                        <div id="settings-security">
                             <label className="block text-sm font-medium text-gray-700 mb-1">Security Question</label>
-                            <select
-                                value={isCustomQuestion ? "Other" : formData.securityQuestion}
-                                onChange={handleQuestionChange}
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary mb-2"
-                            >
-                                <option value="" disabled>Select a question</option>
-                                {PREDEFINED_QUESTIONS.map((q, idx) => (
-                                    <option key={idx} value={q}>{q}</option>
-                                ))}
-                            </select>
+                            <div className="relative">
+                                <select
+                                    value={isCustomQuestion ? "Other" : formData.securityQuestion}
+                                    onChange={handleQuestionChange}
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary mb-2 appearance-none"
+                                >
+                                    <option value="" disabled>Select a question</option>
+                                    {PREDEFINED_QUESTIONS.map((q, idx) => (
+                                        <option key={idx} value={q}>{q}</option>
+                                    ))}
+                                </select>
+                                <LuChevronDown className="absolute right-3 top-3.5 text-gray-500 pointer-events-none" />
+                            </div>
 
                             {isCustomQuestion && (
                                 <input
@@ -231,26 +252,20 @@ const Settings = () => {
                             )}
                         </div>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Security Answer</label>
-                            <input
-                                type="text"
-                                name="securityAnswer"
-                                value={formData.securityAnswer}
-                                onChange={handleChange}
-                                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
-                                placeholder="Enter your answer"
-                            />
-                        </div>
-
-                        <div>
-                            <CurrencySelector
-                                value={formData.currency}
-                                onChange={handleChange}
-                            />
-                        </div>
-
-                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        {formData.securityQuestion && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Security Answer</label>
+                                <input
+                                    type="text"
+                                    name="securityAnswer"
+                                    value={formData.securityAnswer}
+                                    onChange={handleChange}
+                                    className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:border-primary"
+                                    placeholder="Enter your answer"
+                                />
+                            </div>
+                        )}
+                        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200" id="settings-chatbot">
                             <div>
                                 <h6 className="text-sm font-medium text-gray-900">Enable Chatbot</h6>
                                 <p className="text-xs text-gray-500">Show the financial assistant on dashboard</p>
@@ -268,6 +283,7 @@ const Settings = () => {
 
                         <div className="pt-4">
                             <button
+                                id="settings-save-btn"
                                 type="submit"
                                 className="btn-primary w-full md:w-auto px-6 py-2.5 cursor-pointer"
                             >

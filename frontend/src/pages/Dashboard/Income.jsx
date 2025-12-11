@@ -11,6 +11,7 @@ import DeleteConfirmModal from '../../components/Modals/DeleteConfirmModal';
 import { LuPlus, LuDownload } from "react-icons/lu";
 import moment from 'moment';
 import toast from 'react-hot-toast';
+import Loader from '../../components/Loader';
 
 const Income = () => {
   useUserAuth();
@@ -19,8 +20,11 @@ const Income = () => {
   const [openAddModal, setOpenAddModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState({ show: false, data: null });
 
+  const isLoadingRef = React.useRef(false);
+
   const fetchIncomeData = useCallback(async () => {
-    if (loading) return;
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
     setLoading(true);
     try {
       const response = await axiosInstance.get(`${API_PATHS.INCOME.GET_ALL_INCOME}`);
@@ -31,12 +35,13 @@ const Income = () => {
       console.log("Something went wrong", error);
     } finally {
       setLoading(false);
+      isLoadingRef.current = false;
     }
   }, []);
 
   useEffect(() => {
     fetchIncomeData();
-  }, []);
+  }, [fetchIncomeData]);
   const [selectedIncome, setSelectedIncome] = useState(null);
 
   const handleAddIncome = async (data) => {
@@ -87,63 +92,91 @@ const Income = () => {
     }
   };
 
-  // Prepare chart data
-  const chartData = [...incomeData]
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
-    .map(item => ({
-      label: moment(item.date).format('DD MMM'),
-      amount: item.amount,
-      source: item.source
-    }));
+  // Prepare chart data with aggregation
+  const chartData = React.useMemo(() => {
+    const result = [];
+    const sortedData = [...incomeData].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    sortedData.forEach(item => {
+      const label = moment(item.date).format('DD MMM');
+      const lastItem = result[result.length - 1];
+
+      if (lastItem && lastItem.label === label) {
+        lastItem.amount += item.amount;
+        // Avoid duplicate sources if possible, or just join them
+        // lastItem.source += `, ${item.source}`; 
+        // User request implied they want to see the sources. 
+        // Let's be smart: only add if distinctive or just append. 
+        // Simple append as per plan.
+        lastItem.source += `, ${item.source}`;
+      } else {
+        result.push({
+          label,
+          amount: item.amount,
+          source: item.source
+        });
+      }
+    });
+
+    return result;
+  }, [incomeData]);
 
   return (
     <DashboardLayout activeMenu="Income">
       <div className="my-5 mx-auto w-full">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Income Overview</h2>
-          <button
-            onClick={() => setOpenAddModal(true)}
-            className="btn-primary w-auto px-6 flex items-center gap-2 cursor-pointer"
-          >
-            <LuPlus className="text-lg" /> Add Income
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6">
-          <IncomeChart data={chartData} />
-
-          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+        {loading ? <Loader /> : (
+          <>
             <div className="flex items-center justify-between mb-6">
-              <h5 className="text-lg font-semibold text-gray-900">All Incomes</h5>
+              <h2 className="text-2xl font-bold text-gray-900">Income Overview</h2>
               <button
-                onClick={handleDownloadIncome}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary border border-gray-200 hover:border-primary px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                id="income-add-btn"
+                onClick={() => setOpenAddModal(true)}
+                className="btn-primary w-auto px-6 flex items-center gap-2 cursor-pointer"
               >
-                <LuDownload /> Download
+                <LuPlus className="text-lg" /> Add Income
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {incomeData.map((item) => (
-                <TransactionCard
-                  key={item._id}
-                  title={item.source}
-                  date={moment(item.date).format('Do MMM YYYY')}
-                  amount={item.amount}
-                  type="income"
-                  category={item.source}
-                  icon={item.icon}
-                  onDelete={() => setOpenDeleteModal({ show: true, data: item })}
-                  onEdit={() => {
-                    setSelectedIncome(item);
-                    setOpenAddModal(true);
-                  }}
-                />
-              ))}
-              {incomeData.length === 0 && <p className="text-gray-500">No income records found.</p>}
+            <div className="grid grid-cols-1 gap-6">
+              <div id="income-chart">
+                <IncomeChart data={chartData} />
+              </div>
+
+              <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm" id="income-list">
+                <div className="flex items-center justify-between gap-4 flex-wrap mb-6">
+                  <h5 className="text-lg font-semibold text-gray-900">All Incomes</h5>
+                  <button
+                    id="income-download-btn"
+                    onClick={handleDownloadIncome}
+                    className="flex items-center gap-2 text-sm text-gray-600 hover:text-primary border border-gray-200 hover:border-primary px-4 py-2 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <LuDownload /> Download
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {incomeData.map((item) => (
+                    <TransactionCard
+                      key={item._id}
+                      title={item.source}
+                      date={moment(item.date).format('Do MMM YYYY')}
+                      amount={item.amount}
+                      type="income"
+                      category={item.source}
+                      icon={item.icon}
+                      onDelete={() => setOpenDeleteModal({ show: true, data: item })}
+                      onEdit={() => {
+                        setSelectedIncome(item);
+                        setOpenAddModal(true);
+                      }}
+                    />
+                  ))}
+                  {incomeData.length === 0 && <p className="text-gray-500">No income records found.</p>}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
 
       <AddTransactionModal
@@ -164,7 +197,7 @@ const Income = () => {
         title="Delete Income"
         message="Are you sure you want to delete this income record? This action cannot be undone."
       />
-    </DashboardLayout>
+    </DashboardLayout >
   );
 };
 

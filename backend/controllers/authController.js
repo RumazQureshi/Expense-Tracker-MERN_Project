@@ -81,12 +81,6 @@ exports.loginUser = async (req, res) => {
           securityQuestion: user.securityQuestion
         });
       } else {
-        // Fallback if no security question set - though requirement says "save it in db so that..." implying flow depends on it.
-        // Ideally user should set it up. If not, they might be stuck unless we allow generic reset or contact support.
-        // For now, let's keep the message generic or just return invalid credentials if we want to hide existence (but here user knows email is right).
-        // Let's assume we return locked message but with no question if they haven't set one?
-        // Or just allow retry if no sec question? "User entered wrong pass 3 times then there should be an option arrive"
-        // If no security question, maybe just block?
         return res.status(403).json({ message: "Account locked. Please contact support.", errorType: "ACCOUNT_LOCKED_NO_QA" });
       }
     }
@@ -144,54 +138,58 @@ exports.getUserInfo = async (req, res) => {
 };
 
 // Update User Info
+// Update User Info
 exports.updateUserInfo = async (req, res) => {
   try {
-    const { fullName, profileImageUrl, currency } = req.body;
+    const { fullName, currency } = req.body;
     const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Delete old image if a new one is provided or if usage is explicitly removed
-    if ((profileImageUrl || profileImageUrl === "") && user.profileImageUrl && profileImageUrl !== user.profileImageUrl) {
-      console.log(`[Profile Update] Changing image from ${user.profileImageUrl} to ${profileImageUrl || "null"}`);
+    // Handle Profile Image Logic
+    let newProfileImageUrl = user.profileImageUrl;
 
+    // 1. If a file was uploaded?
+    if (req.file) {
+      newProfileImageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+    }
+    // 2. If no file, check if image was removed (empty string passed in body)
+    else if (req.body.profileImageUrl === "") {
+      newProfileImageUrl = null;
+    }
+    // 3. Otherwise, keep existing (req.body.profileImageUrl might be the old URL or undefined)
+
+    // Cleanup: If the image URL is changing, and the old one was a local upload, delete it.
+    if (newProfileImageUrl !== user.profileImageUrl && user.profileImageUrl) {
       const oldUrlParts = user.profileImageUrl.split('/uploads/');
-      // Check if the old image was actually a local upload
       if (oldUrlParts.length > 1) {
         const filename = oldUrlParts[1];
         const filePath = path.join(__dirname, '../uploads', filename);
 
-        console.log(`[Profile Update] Attempting to delete old file: ${filePath}`);
-
         if (fs.existsSync(filePath)) {
           fs.unlink(filePath, (err) => {
-            if (err) {
-              console.error("[Profile Update] Failed to delete old profile image:", err);
-            } else {
-              console.log("[Profile Update] Successfully deleted old profile image.");
-            }
+            if (err) console.error("Failed to delete old image:", err);
           });
-        } else {
-          console.log("[Profile Update] Old file not found on disk.");
         }
       }
     }
 
+    user.profileImageUrl = newProfileImageUrl;
     if (fullName) user.fullName = fullName;
-    if (profileImageUrl || profileImageUrl === "") user.profileImageUrl = profileImageUrl === "" ? null : profileImageUrl;
     if (currency) user.currency = currency;
 
     // Update Security Question
     const { securityQuestion, securityAnswer } = req.body;
     if (securityQuestion) user.securityQuestion = securityQuestion;
-    if (securityAnswer) user.securityAnswer = securityAnswer; // Hashed by pre-save hook
+    if (securityAnswer) user.securityAnswer = securityAnswer;
 
     await user.save();
 
     res.status(200).json({ message: "Profile updated successfully", user });
   } catch (err) {
+    console.error("Error updating profile:", err);
     res.status(500).json({ message: "Error updating profile", error: err.message });
   }
 };
@@ -230,5 +228,25 @@ exports.resetPasswordWithSecurityQuestion = async (req, res) => {
     res.status(200).json({ message: "Password reset successfully. You can now login." });
   } catch (err) {
     res.status(500).json({ message: "Error resetting password", error: err.message });
+  }
+};
+
+// Update Tour Status
+exports.updateTourStatus = async (req, res) => {
+  try {
+    const { route } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (route && !user.completedTours.includes(route)) {
+      user.completedTours.push(route);
+      await user.save();
+    }
+
+    res.status(200).json({ message: "Tour status updated", completedTours: user.completedTours });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating tour status", error: error.message });
   }
 };

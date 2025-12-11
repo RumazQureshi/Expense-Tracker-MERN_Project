@@ -7,7 +7,7 @@ import { LuX } from "react-icons/lu";
 import { getProfileImageUrl } from "../../utils/helper";
 
 const SideMenu = ({ activeMenu, onClose }) => {
-  const { user, clearUser } = useContext(UserContext);
+  const { user, clearUser, loading } = useContext(UserContext);
   const [imgError, setImgError] = React.useState(false);
   const navigate = useNavigate();
 
@@ -59,7 +59,7 @@ const SideMenu = ({ activeMenu, onClose }) => {
         </h5>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1" id="sidebar-menu">
         {SIDE_MENU_DATA.map((item, index) => (
           <button
             key={`menu_${index}`}
@@ -74,6 +74,22 @@ const SideMenu = ({ activeMenu, onClose }) => {
           </button>
         ))}
       </div>
+
+      {!loading && !user?.securityQuestion && (
+        <div className="mt-auto bg-red-50 border border-red-200 rounded-xl p-4 cursor-pointer hover:bg-red-100 transition-colors" onClick={() => navigate('/settings')}>
+          <div className="flex items-start gap-3">
+            <div className="text-red-600 text-xl font-bold">
+              ⚠️
+            </div>
+            <div>
+              <h6 className="text-xs font-bold text-red-800 mb-1">Action Required</h6>
+              <p className="text-[10px] text-red-700 leading-tight">
+                Set up a security question to protect your account.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

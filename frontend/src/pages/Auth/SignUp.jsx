@@ -83,7 +83,7 @@ const SignUp = () => {
         <p className='text-xs text-slate-700 mt-[5px] mb-6'>
           Join us today by entering your details below.</p>
 
-        <form onSubmit={handleSignUp}>
+        <form>
 
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
 
@@ -102,6 +102,7 @@ const SignUp = () => {
               label="Email Address"
               type="email"
               placeholder="you@example.com"
+              autoComplete="username"
             />
 
             <div className='col-span-2'>
@@ -111,24 +112,26 @@ const SignUp = () => {
                 label="Password"
                 type="password"
                 placeholder="Minimum 6 Characters"
+                autoComplete="new-password"
               />
             </div>
           </div>
 
           {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
 
-          <button type="submit" className='btn-primary cursor-pointer mt-5'>
+          <button type="button" onClick={handleSignUp} className='btn-primary cursor-pointer mt-5'>
             SIGN UP
           </button>
 
 
-          <p className='text-[13px] text-slate-800 mt-3'>
-            Already have an account?{" "}
-            <Link className='font-medium text-primary underline' to="/login">
-              Login
-            </Link>
-          </p>
         </form>
+
+        <p className='text-[13px] text-slate-800 mt-3'>
+          Already have an account?{" "}
+          <Link className='font-medium text-primary underline' to="/login">
+            Login
+          </Link>
+        </p>
       </div>
 
     </AuthLayout>

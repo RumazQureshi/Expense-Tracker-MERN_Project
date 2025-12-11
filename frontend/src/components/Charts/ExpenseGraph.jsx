@@ -12,6 +12,9 @@ const CustomTooltip = ({ active, payload, label, currencySymbol }) => {
                 <p className="text-sm text-primary font-bold">
                     {currencySymbol} {payload[0].value}
                 </p>
+                <p className="text-xs text-gray-500 mt-1 font-medium">
+                    {payload[0].payload.category}
+                </p>
             </div>
         );
     }
