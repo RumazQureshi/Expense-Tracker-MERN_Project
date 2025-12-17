@@ -87,34 +87,38 @@ const SignUp = () => {
 
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
 
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            <Input
-              value={fullName}
-              onChange={({ target }) => setFullName(target.value)}
-              label="Full Name"
-              placeholder='Enter Your Full Name'
-              type='text'
-            />
+          <div className='flex flex-col gap-4'>
+            <div className='flex flex-wrap gap-4'>
+              <div className='flex-1 min-w-[180px]'>
+                <Input
+                  value={fullName}
+                  onChange={({ target }) => setFullName(target.value)}
+                  label="Full Name"
+                  placeholder='Enter Your Full Name'
+                  type='text'
+                />
+              </div>
 
-            <Input
-              value={email}
-              onChange={({ target }) => setEmail(target.value)}
-              label="Email Address"
-              type="email"
-              placeholder="you@example.com"
-              autoComplete="username"
-            />
-
-            <div className='col-span-2'>
-              <Input
-                value={password}
-                onChange={({ target }) => setPassword(target.value)}
-                label="Password"
-                type="password"
-                placeholder="Minimum 6 Characters"
-                autoComplete="new-password"
-              />
+              <div className='flex-1 min-w-[180px]'>
+                <Input
+                  value={email}
+                  onChange={({ target }) => setEmail(target.value)}
+                  label="Email Address"
+                  type="email"
+                  placeholder="you@example.com"
+                  autoComplete="username"
+                />
+              </div>
             </div>
+
+            <Input
+              value={password}
+              onChange={({ target }) => setPassword(target.value)}
+              label="Password"
+              type="password"
+              placeholder="Minimum 6 Characters"
+              autoComplete="new-password"
+            />
           </div>
 
           {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}

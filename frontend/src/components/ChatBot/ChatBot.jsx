@@ -70,10 +70,10 @@ const ChatBot = () => {
     };
 
     return (
-        <div className="fixed bottom-10 right-10 z-50">
+        <div className="fixed bottom-4 right-4 md:bottom-10 md:right-10 z-50">
             {/* Chat Window */}
             {isOpen && (
-                <div className="bg-white rounded-2xl shadow-2xl w-80 sm:w-96 mb-4 border border-gray-100 overflow-hidden flex flex-col h-[500px] transition-all duration-300 ease-in-out">
+                <div className="bg-white rounded-2xl shadow-2xl w-[calc(100vw-2rem)] sm:w-96 mb-4 border border-gray-100 overflow-hidden flex flex-col h-[60vh] sm:h-[500px] transition-all duration-300 ease-in-out">
                     {/* Header */}
                     <div className="bg-primary p-4 flex items-center justify-between text-white">
                         <div className="flex items-center gap-2">
