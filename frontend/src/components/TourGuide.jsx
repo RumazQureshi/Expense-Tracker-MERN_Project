@@ -342,6 +342,11 @@ const TourGuide = () => {
         window.addEventListener('resize', updatePosition);
         window.addEventListener('scroll', updatePosition, { capture: true, passive: true });
 
+        const mainContainer = document.getElementById('main-content-scroll-container');
+        if (mainContainer) {
+            mainContainer.addEventListener('scroll', updatePosition, { passive: true });
+        }
+
         // Retry fallback
         const fallbackTimer = setTimeout(updatePosition, 500);
 
@@ -350,6 +355,9 @@ const TourGuide = () => {
             clearTimeout(fallbackTimer);
             window.removeEventListener('resize', updatePosition);
             window.removeEventListener('scroll', updatePosition, { capture: true });
+            if (mainContainer) {
+                mainContainer.removeEventListener('scroll', updatePosition);
+            }
         };
     }, [stepIndex, isOpen, location.pathname]); // Add location.pathname
 

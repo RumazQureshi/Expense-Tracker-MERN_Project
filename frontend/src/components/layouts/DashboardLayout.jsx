@@ -55,7 +55,7 @@ const DashboardLayout = ({ children, activeMenu }) => {
         </>
       )}
 
-      <div className="flex-1 h-[calc(100vh-60px)] md:h-screen overflow-y-auto p-4 md:p-10 pb-24 md:pb-10">
+      <div id="main-content-scroll-container" className="flex-1 h-[calc(100vh-60px)] md:h-screen overflow-y-auto p-4 md:p-10 pb-24 md:pb-10">
         {children}
       </div>
 
