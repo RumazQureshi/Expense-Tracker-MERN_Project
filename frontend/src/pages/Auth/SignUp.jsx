@@ -7,6 +7,7 @@ import ProfilePhotoSelector from '../../components/Inputs/ProfilePhotoSelector';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
+import Loader from '../../components/Loader';
 
 import uploadImage from '../../utils/uploadImage';
 
@@ -17,6 +18,7 @@ const SignUp = () => {
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const { updateUser } = useContext(UserContext)
   const navigate = useNavigate();
@@ -43,6 +45,7 @@ const SignUp = () => {
     }
 
     setError("");
+    setIsLoading(true);
 
     try {
       // upload image if possible
@@ -72,6 +75,8 @@ const SignUp = () => {
       } else {
         setError("Something went wrong. Please try again.")
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -83,7 +88,14 @@ const SignUp = () => {
         <p className='text-xs text-slate-700 mt-[5px] mb-6'>
           Join us today by entering your details below.</p>
 
-        <form>
+
+        {isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+            <Loader />
+          </div>
+        )}
+
+        <form onSubmit={handleSignUp}>
 
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
 
@@ -123,7 +135,7 @@ const SignUp = () => {
 
           {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
 
-          <button type="button" onClick={handleSignUp} className='btn-primary cursor-pointer mt-5'>
+          <button type="submit" className='btn-primary cursor-pointer mt-5'>
             SIGN UP
           </button>
 

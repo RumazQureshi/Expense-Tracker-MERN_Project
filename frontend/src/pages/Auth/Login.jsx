@@ -7,11 +7,13 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
 import toast from 'react-hot-toast';
+import Loader from '../../components/Loader';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [isLocked, setIsLocked] = useState(false);
   const [securityQuestion, setSecurityQuestion] = useState("");
@@ -37,6 +39,7 @@ const Login = () => {
     }
 
     setError("");
+    setIsLoading(true);
 
     try {
       const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
@@ -71,6 +74,8 @@ const Login = () => {
       } else {
         setError("Something went wrong. Please try again.");
       }
+    } finally {
+      setIsLoading(false);
     }
 
   }
@@ -112,8 +117,14 @@ const Login = () => {
         <p className='text-xs text-slate-700 mt-[5px] mb-6'>Please enter your details to login</p>
 
 
+        {isLoading && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm">
+            <Loader />
+          </div>
+        )}
+
         {!isLocked ? (
-          <form>
+          <form onSubmit={handleLogin}>
             <Input
               value={email}
               onChange={({ target }) => setEmail(target.value)}
@@ -134,7 +145,7 @@ const Login = () => {
 
             {error && <p className='text-red-500 text-xs pb-2.5'>{error}</p>}
 
-            <button type="button" onClick={handleLogin} className='btn-primary cursor-pointer mt-5'>
+            <button type="submit" className='btn-primary cursor-pointer mt-5'>
               LOGIN
             </button>
 

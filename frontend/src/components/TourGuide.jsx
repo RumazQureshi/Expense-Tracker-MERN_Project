@@ -6,158 +6,158 @@ import { useUserAuth } from '../hooks/useUserAuth';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPaths';
 
+const routeConfig = {
+    '/dashboard': {
+        steps: [
+            {
+                target: 'body',
+                title: 'Welcome to Dashboard!',
+                content: 'This is your main control center. Here is a quick overview of what you can do.',
+                placement: 'center',
+            },
+            {
+                target: '#sidebar-menu',
+                altTarget: '#mobile-menu-btn',
+                title: 'Navigation Menu',
+                content: 'Use this menu to switch between Dashboard, Incomes, Expenses, and Settings.',
+                placement: 'right',
+            },
+            {
+                target: '#stats-grid',
+                title: 'Financial Summary',
+                content: 'See your total Balance, Income, and Expenses at a glance.',
+                placement: 'bottom',
+            },
+            {
+                target: '#financial-overview',
+                title: 'Visual Breakdown',
+                content: 'The donut chart gives you a quick visual representation of your finances.',
+                placement: 'left',
+            },
+            {
+                target: '#recent-transactions',
+                title: 'Recent Transactions',
+                content: 'Your latest financial activities appear here for quick access.',
+                placement: 'top',
+            }
+        ]
+    },
+    '/income': {
+        steps: [
+            {
+                target: 'body',
+                title: 'Income Management',
+                content: 'Here you can track all your income properly.',
+                placement: 'center',
+            },
+            {
+                target: '#income-add-btn',
+                title: 'Add New Income',
+                content: 'Click here to add a new source of income.',
+                placement: 'bottom',
+            },
+            {
+                target: '#income-chart',
+                title: 'Income Trends',
+                content: 'Visualize your income over time with this chart.',
+                placement: 'top',
+            },
+            {
+                target: '#income-list',
+                title: 'Income History',
+                content: 'View, edit, or delete past income records here.',
+                placement: 'top',
+            },
+            {
+                target: '#income-download-btn',
+                title: 'Export Data',
+                content: 'Download your income report as an Excel file.',
+                placement: 'top',
+            }
+        ]
+    },
+    '/expense': {
+        steps: [
+            {
+                target: 'body',
+                title: 'Expense Tracking',
+                content: 'Keep an eye on where your money goes.',
+                placement: 'center',
+            },
+            {
+                target: '#expense-add-btn',
+                title: 'Add New Expense',
+                content: 'Add your daily spending here.',
+                placement: 'bottom',
+            },
+            {
+                target: '#expense-chart',
+                title: 'Expense Trends',
+                content: 'Track your spending habits over time.',
+                placement: 'top',
+            },
+            {
+                target: '#expense-list',
+                title: 'Expense History',
+                content: 'Manage your past expenses. You can edit or delete them.',
+                placement: 'top',
+            },
+            {
+                target: '#expense-download-btn',
+                title: 'Export Data',
+                content: 'Download your expense report for offline analysis.',
+                placement: 'top',
+            }
+        ]
+    },
+    '/settings': {
+        steps: [
+            {
+                target: 'body',
+                title: 'Profile Settings',
+                content: 'Customize your profile and app preferences here.',
+                placement: 'center',
+            },
+            {
+                target: '#settings-profile-pic',
+                title: 'Profile Picture',
+                content: 'Click here to upload or change your profile photo.',
+                placement: 'right',
+            },
+            {
+                target: '#settings-personal-info',
+                title: 'Personal Info',
+                content: 'Update your name and currency here.',
+                placement: 'top',
+            },
+            {
+                target: '#settings-security',
+                title: 'Account Security',
+                content: 'Set a security question. This helps you recover your password if you forget it.',
+                placement: 'top',
+            },
+            {
+                target: '#settings-chatbot',
+                title: 'Chatbot',
+                content: 'Toggle the chatbot. It can answer questions about your spending!',
+                placement: 'top',
+            },
+            {
+                target: '#settings-save-btn',
+                title: 'Save Changes',
+                content: 'Make sure to save your changes after editing.',
+                placement: 'top',
+            }
+        ]
+    }
+};
+
 const TourGuide = () => {
     const { user, updateUser } = useUserAuth();
     const [stepIndex, setStepIndex] = useState(0);
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
 
-    // Configuration for different routes
-    const routeConfig = {
-        '/dashboard': {
-            steps: [
-                {
-                    target: 'body',
-                    title: 'Welcome to Dashboard!',
-                    content: 'This is your main control center. Here is a quick overview of what you can do.',
-                    placement: 'center',
-                },
-                {
-                    target: '#sidebar-menu',
-                    altTarget: '#mobile-menu-btn',
-                    title: 'Navigation Menu',
-                    content: 'Use this menu to switch between Dashboard, Incomes, Expenses, and Settings.',
-                    placement: 'right',
-                },
-                {
-                    target: '#stats-grid',
-                    title: 'Financial Summary',
-                    content: 'See your total Balance, Income, and Expenses at a glance.',
-                    placement: 'bottom',
-                },
-                {
-                    target: '#financial-overview',
-                    title: 'Visual Breakdown',
-                    content: 'The donut chart gives you a quick visual representation of your finances.',
-                    placement: 'left',
-                },
-                {
-                    target: '#recent-transactions',
-                    title: 'Recent Transactions',
-                    content: 'Your latest financial activities appear here for quick access.',
-                    placement: 'top',
-                }
-            ]
-        },
-        '/income': {
-            steps: [
-                {
-                    target: 'body',
-                    title: 'Income Management',
-                    content: 'Here you can track all your income properly.',
-                    placement: 'center',
-                },
-                {
-                    target: '#income-add-btn',
-                    title: 'Add New Income',
-                    content: 'Click here to add a new source of income.',
-                    placement: 'bottom',
-                },
-                {
-                    target: '#income-chart',
-                    title: 'Income Trends',
-                    content: 'Visualize your income over time with this chart.',
-                    placement: 'top',
-                },
-                {
-                    target: '#income-list',
-                    title: 'Income History',
-                    content: 'View, edit, or delete past income records here.',
-                    placement: 'top',
-                },
-                {
-                    target: '#income-download-btn',
-                    title: 'Export Data',
-                    content: 'Download your income report as an Excel file.',
-                    placement: 'top',
-                }
-            ]
-        },
-        '/expense': {
-            steps: [
-                {
-                    target: 'body',
-                    title: 'Expense Tracking',
-                    content: 'Keep an eye on where your money goes.',
-                    placement: 'center',
-                },
-                {
-                    target: '#expense-add-btn',
-                    title: 'Add New Expense',
-                    content: 'Add your daily spending here.',
-                    placement: 'bottom',
-                },
-                {
-                    target: '#expense-chart',
-                    title: 'Expense Trends',
-                    content: 'Track your spending habits over time.',
-                    placement: 'top',
-                },
-                {
-                    target: '#expense-list',
-                    title: 'Expense History',
-                    content: 'Manage your past expenses. You can edit or delete them.',
-                    placement: 'top',
-                },
-                {
-                    target: '#expense-download-btn',
-                    title: 'Export Data',
-                    content: 'Download your expense report for offline analysis.',
-                    placement: 'top',
-                }
-            ]
-        },
-        '/settings': {
-            steps: [
-                {
-                    target: 'body',
-                    title: 'Profile Settings',
-                    content: 'Customize your profile and app preferences here.',
-                    placement: 'center',
-                },
-                {
-                    target: '#settings-profile-pic',
-                    title: 'Profile Picture',
-                    content: 'Click here to upload or change your profile photo.',
-                    placement: 'right',
-                },
-                {
-                    target: '#settings-personal-info',
-                    title: 'Personal Info',
-                    content: 'Update your name and currency here.',
-                    placement: 'top',
-                },
-                {
-                    target: '#settings-security',
-                    title: 'Account Security',
-                    content: 'Set a security question. This helps you recover your password if you forget it.',
-                    placement: 'top',
-                },
-                {
-                    target: '#settings-chatbot',
-                    title: 'Chatbot',
-                    content: 'Toggle the chatbot. It can answer questions about your spending!',
-                    placement: 'top',
-                },
-                {
-                    target: '#settings-save-btn',
-                    title: 'Save Changes',
-                    content: 'Make sure to save your changes after editing.',
-                    placement: 'top',
-                }
-            ]
-        }
-    };
 
     const currentConfig = routeConfig[location.pathname];
     const steps = currentConfig ? currentConfig.steps : [];
