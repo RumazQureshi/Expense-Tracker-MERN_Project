@@ -153,7 +153,7 @@ exports.updateUserInfo = async (req, res) => {
 
     // 1. If a file was uploaded?
     if (req.file) {
-      newProfileImageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      newProfileImageUrl = req.file.path;
     }
     // 2. If no file, check if image was removed (empty string passed in body)
     else if (req.body.profileImageUrl === "") {

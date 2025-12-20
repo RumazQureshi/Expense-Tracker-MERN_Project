@@ -10,8 +10,8 @@ import toast from 'react-hot-toast';
 import Loader from '../../components/Loader';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('ras@gmail.com');
+  const [password, setPassword] = useState('000000');
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
